@@ -22,16 +22,16 @@ class AccountNumberValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null, "GB")).isFalse();
-        assertThat(validator.isValid("12345678", null)).isFalse();
-        assertThat(validator.isValid(null, null)).isFalse();
+        assertThat(validator.isValidForCountry(null, "GB")).isFalse();
+        assertThat(validator.isValidForCountry("12345678", null)).isFalse();
+        assertThat(validator.isValidForCountry(null, null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("", "GB")).isFalse();
-        assertThat(validator.isValid("12345678", "")).isFalse();
-        assertThat(validator.isValid("", "")).isFalse();
+        assertThat(validator.isValidForCountry("", "GB")).isFalse();
+        assertThat(validator.isValidForCountry("12345678", "")).isFalse();
+        assertThat(validator.isValidForCountry("", "")).isFalse();
     }
 
     @ParameterizedTest
@@ -47,7 +47,7 @@ class AccountNumberValidatorTest {
             "1234, CH"          // Switzerland: 4-11 digits
     })
     void shouldReturnTrueForValidAccountNumbers(String accountNumber, String countryCode) {
-        assertThat(validator.isValid(accountNumber, countryCode)).isTrue();
+        assertThat(validator.isValidForCountry(accountNumber, countryCode)).isTrue();
     }
 
     @ParameterizedTest
@@ -65,27 +65,27 @@ class AccountNumberValidatorTest {
             "12345678, XX"      // Invalid country code
     })
     void shouldReturnFalseForInvalidAccountNumbers(String accountNumber, String countryCode) {
-        assertThat(validator.isValid(accountNumber, countryCode)).isFalse();
+        assertThat(validator.isValidForCountry(accountNumber, countryCode)).isFalse();
     }
 
     @Test
     void shouldHandleAccountNumberWithSpaces() {
-        assertThat(validator.isValid("1234 5678", "GB")).isTrue();
+        assertThat(validator.isValidForCountry("1234 5678", "GB")).isTrue();
     }
 
     @Test
     void shouldHandleAccountNumberWithHyphens() {
-        assertThat(validator.isValid("1234-5678", "GB")).isTrue();
+        assertThat(validator.isValidForCountry("1234-5678", "GB")).isTrue();
     }
 
     @Test
     void shouldHandleCountryCodeWithLowercase() {
-        assertThat(validator.isValid("12345678", "gb")).isTrue();
+        assertThat(validator.isValidForCountry("12345678", "gb")).isTrue();
     }
 
     @Test
     void shouldHandleCountryCodeWithSpaces() {
-        assertThat(validator.isValid("12345678", " GB ")).isTrue();
+        assertThat(validator.isValidForCountry("12345678", " GB ")).isTrue();
     }
 
     @ParameterizedTest

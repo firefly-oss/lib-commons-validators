@@ -1,5 +1,9 @@
 package com.catalis.validators;
 
+import com.catalis.annotations.ValidSortCode;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.regex.Pattern;
 
 /**
@@ -9,25 +13,30 @@ import java.util.regex.Pattern;
  * which defines sort codes as 6-digit numbers used to identify banks and branches.
  * Sort codes are typically formatted as "XX-XX-XX" where X is a digit.
  */
-public class SortCodeValidator {
-    
+public class SortCodeValidator implements ConstraintValidator<ValidSortCode, String> {
+
+    @Override
+    public void initialize(ValidSortCode constraintAnnotation) {
+        // No initialization needed
+    }
+
     // Sort code format: 6 digits, optionally separated by hyphens or spaces
     private static final Pattern SORT_CODE_PATTERN = Pattern.compile("^\\d{2}[-\\s]?\\d{2}[-\\s]?\\d{2}$");
-    
+
     /**
      * Validates if the provided sort code is valid.
      *
      * @param sortCode the sort code to validate
      * @return true if the sort code is valid, false otherwise
      */
-    public boolean isValid(String sortCode) {
+    public boolean isValidSortCode(String sortCode) {
         if (sortCode == null || sortCode.isEmpty()) {
             return false;
         }
-        
+
         return SORT_CODE_PATTERN.matcher(sortCode).matches();
     }
-    
+
     /**
      * Normalizes a sort code by removing any separators.
      *
@@ -35,13 +44,13 @@ public class SortCodeValidator {
      * @return the normalized sort code (6 digits without separators) or null if invalid
      */
     public String normalize(String sortCode) {
-        if (!isValid(sortCode)) {
+        if (!isValidSortCode(sortCode)) {
             return null;
         }
-        
+
         return sortCode.replaceAll("[\\s-]", "");
     }
-    
+
     /**
      * Formats a sort code with hyphens (XX-XX-XX).
      *
@@ -53,12 +62,12 @@ public class SortCodeValidator {
         if (normalized == null) {
             return null;
         }
-        
+
         return normalized.substring(0, 2) + "-" + 
                normalized.substring(2, 4) + "-" + 
                normalized.substring(4, 6);
     }
-    
+
     /**
      * Extracts the bank identifier from a sort code (first 2 digits).
      *
@@ -70,10 +79,10 @@ public class SortCodeValidator {
         if (normalized == null) {
             return null;
         }
-        
+
         return normalized.substring(0, 2);
     }
-    
+
     /**
      * Extracts the branch identifier from a sort code (last 4 digits).
      *
@@ -85,7 +94,19 @@ public class SortCodeValidator {
         if (normalized == null) {
             return null;
         }
-        
+
         return normalized.substring(2, 6);
+    }
+
+    /**
+     * Validates if the provided sort code is valid according to the annotation configuration.
+     *
+     * @param sortCode the sort code to validate
+     * @param context the constraint validator context
+     * @return true if the sort code is valid, false otherwise
+     */
+    @Override
+    public boolean isValid(String sortCode, ConstraintValidatorContext context) {
+        return isValidSortCode(sortCode);
     }
 }

@@ -21,12 +21,12 @@ class CurrencyCodeValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null)).isFalse();
+        assertThat(validator.isValidCurrencyCode(null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("")).isFalse();
+        assertThat(validator.isValidCurrencyCode("")).isFalse();
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class CurrencyCodeValidatorTest {
             "DKK"  // Danish Krone
     })
     void shouldReturnTrueForValidCurrencyCodes(String currencyCode) {
-        assertThat(validator.isValid(currencyCode)).isTrue();
+        assertThat(validator.isValidCurrencyCode(currencyCode)).isTrue();
     }
 
     @ParameterizedTest
@@ -56,17 +56,17 @@ class CurrencyCodeValidatorTest {
             "€"    // Symbol instead of code
     })
     void shouldReturnFalseForInvalidCurrencyCodes(String currencyCode) {
-        assertThat(validator.isValid(currencyCode)).isFalse();
+        assertThat(validator.isValidCurrencyCode(currencyCode)).isFalse();
     }
 
     @Test
     void shouldHandleCurrencyCodeWithSpaces() {
-        assertThat(validator.isValid(" EUR ")).isTrue();
+        assertThat(validator.isValidCurrencyCode(" EUR ")).isTrue();
     }
 
     @Test
     void shouldHandleCurrencyCodeWithLowercase() {
-        assertThat(validator.isValid("eur")).isTrue();
+        assertThat(validator.isValidCurrencyCode("eur")).isTrue();
     }
 
     @Test

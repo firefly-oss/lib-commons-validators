@@ -21,12 +21,12 @@ class IbanValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null)).isFalse();
+        assertThat(validator.isValid(null, null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("")).isFalse();
+        assertThat(validator.isValid("", null)).isFalse();
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class IbanValidatorTest {
             "SE35 5000 0000 0549 1000 0003" // Sweden
     })
     void shouldReturnTrueForValidIbans(String iban) {
-        assertThat(validator.isValid(iban)).isTrue();
+        assertThat(validator.isValid(iban, null)).isTrue();
     }
 
     @ParameterizedTest
@@ -57,16 +57,16 @@ class IbanValidatorTest {
             "IT60X05428111010000001234567" // Too long for Italy
     })
     void shouldReturnFalseForInvalidIbans(String iban) {
-        assertThat(validator.isValid(iban)).isFalse();
+        assertThat(validator.isValid(iban, null)).isFalse();
     }
 
     @Test
     void shouldHandleIbanWithSpaces() {
-        assertThat(validator.isValid("DE89 3704 0044 0532 0130 00")).isTrue();
+        assertThat(validator.isValid("DE89 3704 0044 0532 0130 00", null)).isTrue();
     }
 
     @Test
     void shouldHandleIbanWithLowercase() {
-        assertThat(validator.isValid("de89 3704 0044 0532 0130 00")).isTrue();
+        assertThat(validator.isValid("de89 3704 0044 0532 0130 00", null)).isTrue();
     }
 }

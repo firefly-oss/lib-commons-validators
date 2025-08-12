@@ -1,5 +1,9 @@
 package com.catalis.validators;
 
+import com.catalis.annotations.ValidAccountNumber;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -10,14 +14,21 @@ import java.util.regex.Pattern;
  * This validator checks if an account number is valid according to various
  * country-specific formats, with a focus on European banking systems.
  */
-public class AccountNumberValidator {
-    
+public class AccountNumberValidator implements ConstraintValidator<ValidAccountNumber, String> {
+
+    private String countryCode;
+
+    @Override
+    public void initialize(ValidAccountNumber constraintAnnotation) {
+        this.countryCode = constraintAnnotation.countryCode();
+    }
+
     // UK account number format: 8 digits
     private static final Pattern UK_ACCOUNT_NUMBER_PATTERN = Pattern.compile("^\\d{8}$");
-    
+
     // Map of country codes to their respective account number patterns
     private static final Map<String, Pattern> COUNTRY_PATTERNS = new HashMap<>();
-    
+
     static {
         // Initialize patterns for different countries
         COUNTRY_PATTERNS.put("GB", UK_ACCOUNT_NUMBER_PATTERN); // United Kingdom: 8 digits
@@ -29,7 +40,7 @@ public class AccountNumberValidator {
         COUNTRY_PATTERNS.put("BE", Pattern.compile("^\\d{12}$")); // Belgium: 12 digits
         COUNTRY_PATTERNS.put("CH", Pattern.compile("^\\d{4,11}$")); // Switzerland: 4-11 digits
     }
-    
+
     /**
      * Validates if the provided account number is valid for the specified country.
      *
@@ -37,26 +48,26 @@ public class AccountNumberValidator {
      * @param countryCode the ISO 3166-1 alpha-2 country code (e.g., "GB" for United Kingdom)
      * @return true if the account number is valid for the country, false otherwise
      */
-    public boolean isValid(String accountNumber, String countryCode) {
+    public boolean isValidForCountry(String accountNumber, String countryCode) {
         if (accountNumber == null || accountNumber.isEmpty() || 
             countryCode == null || countryCode.isEmpty()) {
             return false;
         }
-        
+
         // Normalize the account number and country code
         String normalizedAccountNumber = normalize(accountNumber);
         String normalizedCountryCode = countryCode.trim().toUpperCase();
-        
+
         // Check if we have a pattern for this country
         Pattern pattern = COUNTRY_PATTERNS.get(normalizedCountryCode);
         if (pattern == null) {
             return false; // Unsupported country
         }
-        
+
         // Validate against the country-specific pattern
         return pattern.matcher(normalizedAccountNumber).matches();
     }
-    
+
     /**
      * Validates if the provided account number is valid for the UK.
      *
@@ -64,9 +75,21 @@ public class AccountNumberValidator {
      * @return true if the account number is valid for the UK, false otherwise
      */
     public boolean isValidUkAccountNumber(String accountNumber) {
-        return isValid(accountNumber, "GB");
+        return isValidForCountry(accountNumber, "GB");
     }
-    
+
+    /**
+     * Validates if the provided account number is valid according to the annotation configuration.
+     *
+     * @param accountNumber the account number to validate
+     * @param context the constraint validator context
+     * @return true if the account number is valid, false otherwise
+     */
+    @Override
+    public boolean isValid(String accountNumber, ConstraintValidatorContext context) {
+        return isValidForCountry(accountNumber, this.countryCode);
+    }
+
     /**
      * Normalizes an account number by removing spaces and other separators.
      *
@@ -77,10 +100,10 @@ public class AccountNumberValidator {
         if (accountNumber == null || accountNumber.isEmpty()) {
             return null;
         }
-        
+
         return accountNumber.replaceAll("[\\s-]", "");
     }
-    
+
     /**
      * Formats a UK account number with standard spacing (e.g., "12345678" to "12345678").
      * This method is primarily for consistency with other formatters, as UK account numbers
@@ -93,10 +116,10 @@ public class AccountNumberValidator {
         if (!isValidUkAccountNumber(accountNumber)) {
             return null;
         }
-        
+
         return normalize(accountNumber);
     }
-    
+
     /**
      * Validates if the provided sort code and account number combination is valid for the UK.
      * This method uses the SortCodeValidator to validate the sort code.
@@ -107,9 +130,9 @@ public class AccountNumberValidator {
      */
     public boolean isValidUkBankAccount(String sortCode, String accountNumber) {
         SortCodeValidator sortCodeValidator = new SortCodeValidator();
-        return sortCodeValidator.isValid(sortCode) && isValidUkAccountNumber(accountNumber);
+        return sortCodeValidator.isValidSortCode(sortCode) && isValidUkAccountNumber(accountNumber);
     }
-    
+
     /**
      * Formats a UK bank account as a single string with sort code and account number.
      * Format: "XX-XX-XX XXXXXXXX" (sort code with hyphens, space, account number)
@@ -122,11 +145,11 @@ public class AccountNumberValidator {
         if (!isValidUkBankAccount(sortCode, accountNumber)) {
             return null;
         }
-        
+
         SortCodeValidator sortCodeValidator = new SortCodeValidator();
         String formattedSortCode = sortCodeValidator.format(sortCode);
         String normalizedAccountNumber = normalize(accountNumber);
-        
+
         return formattedSortCode + " " + normalizedAccountNumber;
     }
 }

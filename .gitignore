@@ -10,17 +10,6 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# IntelliJ temporary files
-*.swp
-*.swo
-.idea/
-out/
-
-# Target-related development files
-*.jar
-*.class
-.generated-source/
-
 # Package Files #
 *.jar
 *.war
@@ -34,3 +23,23 @@ out/
 hs_err_pid*
 replay_pid*
 
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+
+# Target directory (Maven/Gradle)
+target/
+
+# Temporary files created by IntelliJ IDEA
+out/
+*.class
+
+# IntelliJ generated assets like workspace.xml or tasks.xml
+workspace.xml
+tasks.xml
+
+# Other IntelliJ settings to ignore
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/shelf/

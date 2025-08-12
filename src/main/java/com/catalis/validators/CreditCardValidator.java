@@ -1,5 +1,10 @@
 package com.catalis.validators;
 
+import com.catalis.annotations.ValidCreditCard;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
@@ -9,8 +14,15 @@ import java.util.regex.Pattern;
  * - Card type specific patterns (Visa, MasterCard, American Express, etc.)
  * - Luhn algorithm validation
  */
-public class CreditCardValidator {
-    
+public class CreditCardValidator implements ConstraintValidator<ValidCreditCard, String> {
+
+    private CardType[] acceptedCardTypes;
+
+    @Override
+    public void initialize(ValidCreditCard constraintAnnotation) {
+        this.acceptedCardTypes = constraintAnnotation.types();
+    }
+
     // Credit card type patterns
     private static final Pattern VISA_PATTERN = Pattern.compile("^4[0-9]{12}(?:[0-9]{3})?$");
     private static final Pattern MASTERCARD_PATTERN = Pattern.compile("^5[1-5][0-9]{14}$");
@@ -18,7 +30,7 @@ public class CreditCardValidator {
     private static final Pattern DISCOVER_PATTERN = Pattern.compile("^6(?:011|5[0-9]{2})[0-9]{12}$");
     private static final Pattern DINERS_CLUB_PATTERN = Pattern.compile("^3(?:0[0-5]|[68][0-9])[0-9]{11}$");
     private static final Pattern JCB_PATTERN = Pattern.compile("^(?:2131|1800|35\\d{3})\\d{11}$");
-    
+
     /**
      * Credit card types supported by this validator.
      */
@@ -31,30 +43,31 @@ public class CreditCardValidator {
         JCB,
         UNKNOWN
     }
-    
+
     /**
      * Validates if the provided credit card number is valid.
      *
      * @param cardNumber the credit card number to validate
      * @return true if the credit card number is valid, false otherwise
      */
-    public boolean isValid(String cardNumber) {
+    public boolean isValidCreditCard(String cardNumber) {
         if (cardNumber == null || cardNumber.isEmpty()) {
             return false;
         }
-        
+
         // Remove spaces and dashes
         String normalizedCardNumber = cardNumber.replaceAll("[\\s-]", "");
-        
+
         // Check if it's a valid card type
-        if (getCardType(normalizedCardNumber) == CardType.UNKNOWN) {
+        CardType cardType = getCardType(normalizedCardNumber);
+        if (cardType == CardType.UNKNOWN) {
             return false;
         }
-        
+
         // Validate using Luhn algorithm
         return validateLuhn(normalizedCardNumber);
     }
-    
+
     /**
      * Determines the type of credit card based on the card number.
      *
@@ -65,9 +78,9 @@ public class CreditCardValidator {
         if (cardNumber == null || cardNumber.isEmpty()) {
             return CardType.UNKNOWN;
         }
-        
+
         String normalizedCardNumber = cardNumber.replaceAll("[\\s-]", "");
-        
+
         if (VISA_PATTERN.matcher(normalizedCardNumber).matches()) {
             return CardType.VISA;
         } else if (MASTERCARD_PATTERN.matcher(normalizedCardNumber).matches()) {
@@ -84,7 +97,7 @@ public class CreditCardValidator {
             return CardType.UNKNOWN;
         }
     }
-    
+
     /**
      * Validates a credit card number using the Luhn algorithm.
      *
@@ -94,16 +107,16 @@ public class CreditCardValidator {
     private boolean validateLuhn(String cardNumber) {
         int sum = 0;
         boolean alternate = false;
-        
+
         // Process from right to left
         for (int i = cardNumber.length() - 1; i >= 0; i--) {
             int digit = Character.getNumericValue(cardNumber.charAt(i));
-            
+
             // Check if the character is a digit
             if (digit < 0 || digit > 9) {
                 return false;
             }
-            
+
             // Double every second digit
             if (alternate) {
                 digit *= 2;
@@ -111,15 +124,15 @@ public class CreditCardValidator {
                     digit -= 9;
                 }
             }
-            
+
             sum += digit;
             alternate = !alternate;
         }
-        
+
         // If sum is divisible by 10, the number is valid
         return sum % 10 == 0;
     }
-    
+
     /**
      * Masks a credit card number for display, showing only the last 4 digits.
      *
@@ -130,22 +143,45 @@ public class CreditCardValidator {
         if (cardNumber == null || cardNumber.isEmpty()) {
             return null;
         }
-        
+
         String normalizedCardNumber = cardNumber.replaceAll("[\\s-]", "");
-        
+
         if (normalizedCardNumber.length() < 4) {
             return null;
         }
-        
+
         int maskedLength = normalizedCardNumber.length() - 4;
         StringBuilder masked = new StringBuilder();
-        
+
         for (int i = 0; i < maskedLength; i++) {
             masked.append("*");
         }
-        
+
         masked.append(normalizedCardNumber.substring(maskedLength));
-        
+
         return masked.toString();
+    }
+
+    /**
+     * Validates if the provided credit card number is valid according to the annotation configuration.
+     *
+     * @param cardNumber the credit card number to validate
+     * @param context the constraint validator context
+     * @return true if the credit card number is valid, false otherwise
+     */
+    @Override
+    public boolean isValid(String cardNumber, ConstraintValidatorContext context) {
+        if (!isValidCreditCard(cardNumber)) {
+            return false;
+        }
+
+        // If no specific card types are specified in the annotation, accept all valid cards
+        if (acceptedCardTypes == null || acceptedCardTypes.length == 0) {
+            return true;
+        }
+
+        // Check if the card type is among the accepted types
+        CardType cardType = getCardType(cardNumber.replaceAll("[\\s-]", ""));
+        return Arrays.asList(acceptedCardTypes).contains(cardType);
     }
 }

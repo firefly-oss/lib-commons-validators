@@ -21,12 +21,12 @@ class BicValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null)).isFalse();
+        assertThat(validator.isValidBic(null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("")).isFalse();
+        assertThat(validator.isValidBic("")).isFalse();
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class BicValidatorTest {
             "BOFAUS3N"      // Bank of America
     })
     void shouldReturnTrueForValidBics(String bic) {
-        assertThat(validator.isValid(bic)).isTrue();
+        assertThat(validator.isValidBic(bic)).isTrue();
     }
 
     @ParameterizedTest
@@ -58,17 +58,17 @@ class BicValidatorTest {
             "DEUTDEFF XX"   // Contains space
     })
     void shouldReturnFalseForInvalidBics(String bic) {
-        assertThat(validator.isValid(bic)).isFalse();
+        assertThat(validator.isValidBic(bic)).isFalse();
     }
 
     @Test
     void shouldHandleBicWithSpaces() {
-        assertThat(validator.isValid("DEUT DEFF")).isTrue();
+        assertThat(validator.isValidBic("DEUT DEFF")).isTrue();
     }
 
     @Test
     void shouldHandleBicWithLowercase() {
-        assertThat(validator.isValid("deutdeff")).isTrue();
+        assertThat(validator.isValidBic("deutdeff")).isTrue();
     }
 
     @Test

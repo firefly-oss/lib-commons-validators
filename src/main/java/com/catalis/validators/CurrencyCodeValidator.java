@@ -1,5 +1,9 @@
 package com.catalis.validators;
 
+import com.catalis.annotations.ValidCurrencyCode;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,11 +13,20 @@ import java.util.Set;
  * This validator checks if a currency code is valid according to the ISO 4217 standard,
  * which defines three-letter codes for currencies used in international transactions.
  */
-public class CurrencyCodeValidator {
-    
+public class CurrencyCodeValidator implements ConstraintValidator<ValidCurrencyCode, String> {
+
+    private boolean europeanOnly;
+    private boolean euroOnly;
+
+    @Override
+    public void initialize(ValidCurrencyCode constraintAnnotation) {
+        this.europeanOnly = constraintAnnotation.europeanOnly();
+        this.euroOnly = constraintAnnotation.euroOnly();
+    }
+
     // Set of valid ISO 4217 currency codes
     private static final Set<String> VALID_CURRENCY_CODES = new HashSet<>();
-    
+
     static {
         // European currencies
         VALID_CURRENCY_CODES.add("EUR"); // Euro
@@ -29,7 +42,7 @@ public class CurrencyCodeValidator {
         VALID_CURRENCY_CODES.add("BGN"); // Bulgarian Lev
         VALID_CURRENCY_CODES.add("HRK"); // Croatian Kuna
         VALID_CURRENCY_CODES.add("ISK"); // Icelandic Króna
-        
+
         // Major world currencies
         VALID_CURRENCY_CODES.add("USD"); // US Dollar
         VALID_CURRENCY_CODES.add("CAD"); // Canadian Dollar
@@ -44,36 +57,36 @@ public class CurrencyCodeValidator {
         VALID_CURRENCY_CODES.add("ZAR"); // South African Rand
         VALID_CURRENCY_CODES.add("BRL"); // Brazilian Real
         VALID_CURRENCY_CODES.add("MXN"); // Mexican Peso
-        
+
         // Middle Eastern currencies
         VALID_CURRENCY_CODES.add("AED"); // UAE Dirham
         VALID_CURRENCY_CODES.add("SAR"); // Saudi Riyal
         VALID_CURRENCY_CODES.add("QAR"); // Qatari Riyal
         VALID_CURRENCY_CODES.add("ILS"); // Israeli New Shekel
-        
+
         // Cryptocurrencies with ISO codes
         VALID_CURRENCY_CODES.add("XBT"); // Bitcoin
         VALID_CURRENCY_CODES.add("XET"); // Ethereum
     }
-    
+
     /**
      * Validates if the provided currency code is valid according to ISO 4217.
      *
      * @param currencyCode the currency code to validate
      * @return true if the currency code is valid, false otherwise
      */
-    public boolean isValid(String currencyCode) {
+    public boolean isValidCurrencyCode(String currencyCode) {
         if (currencyCode == null || currencyCode.isEmpty()) {
             return false;
         }
-        
+
         // Convert to uppercase for case-insensitive comparison
         String normalizedCode = currencyCode.trim().toUpperCase();
-        
+
         // Check if it's in our set of valid codes
         return VALID_CURRENCY_CODES.contains(normalizedCode);
     }
-    
+
     /**
      * Checks if the currency is a European Union currency (EUR).
      *
@@ -84,11 +97,11 @@ public class CurrencyCodeValidator {
         if (currencyCode == null || currencyCode.isEmpty()) {
             return false;
         }
-        
+
         String normalizedCode = currencyCode.trim().toUpperCase();
         return "EUR".equals(normalizedCode);
     }
-    
+
     /**
      * Checks if the currency is from a European country.
      *
@@ -96,12 +109,12 @@ public class CurrencyCodeValidator {
      * @return true if the currency is European, false otherwise
      */
     public boolean isEuropeanCurrency(String currencyCode) {
-        if (!isValid(currencyCode)) {
+        if (!isValidCurrencyCode(currencyCode)) {
             return false;
         }
-        
+
         String normalizedCode = currencyCode.trim().toUpperCase();
-        
+
         // Set of European currency codes
         Set<String> europeanCurrencies = new HashSet<>();
         europeanCurrencies.add("EUR"); // Euro
@@ -117,7 +130,31 @@ public class CurrencyCodeValidator {
         europeanCurrencies.add("BGN"); // Bulgarian Lev
         europeanCurrencies.add("HRK"); // Croatian Kuna
         europeanCurrencies.add("ISK"); // Icelandic Króna
-        
+
         return europeanCurrencies.contains(normalizedCode);
+    }
+
+    /**
+     * Validates if the provided currency code is valid according to the annotation configuration.
+     *
+     * @param currencyCode the currency code to validate
+     * @param context the constraint validator context
+     * @return true if the currency code is valid, false otherwise
+     */
+    @Override
+    public boolean isValid(String currencyCode, ConstraintValidatorContext context) {
+        if (!isValidCurrencyCode(currencyCode)) {
+            return false;
+        }
+
+        if (euroOnly) {
+            return isEuroCurrency(currencyCode);
+        }
+
+        if (europeanOnly) {
+            return isEuropeanCurrency(currencyCode);
+        }
+
+        return true;
     }
 }

@@ -22,12 +22,12 @@ class CreditCardValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null)).isFalse();
+        assertThat(validator.isValidCreditCard(null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("")).isFalse();
+        assertThat(validator.isValidCreditCard("")).isFalse();
     }
 
     @ParameterizedTest
@@ -47,7 +47,7 @@ class CreditCardValidatorTest {
             "38520000023237"       // Diners Club
     })
     void shouldReturnTrueForValidCardNumbers(String cardNumber) {
-        assertThat(validator.isValid(cardNumber)).isTrue();
+        assertThat(validator.isValidCreditCard(cardNumber)).isTrue();
     }
 
     @ParameterizedTest
@@ -63,17 +63,17 @@ class CreditCardValidatorTest {
             "0000000000000000"     // All zeros
     })
     void shouldReturnFalseForInvalidCardNumbers(String cardNumber) {
-        assertThat(validator.isValid(cardNumber)).isFalse();
+        assertThat(validator.isValidCreditCard(cardNumber)).isFalse();
     }
 
     @Test
     void shouldHandleCardNumberWithSpaces() {
-        assertThat(validator.isValid("4111 1111 1111 1111")).isTrue();
+        assertThat(validator.isValidCreditCard("4111 1111 1111 1111")).isTrue();
     }
 
     @Test
     void shouldHandleCardNumberWithDashes() {
-        assertThat(validator.isValid("4111-1111-1111-1111")).isTrue();
+        assertThat(validator.isValidCreditCard("4111-1111-1111-1111")).isTrue();
     }
 
     @ParameterizedTest

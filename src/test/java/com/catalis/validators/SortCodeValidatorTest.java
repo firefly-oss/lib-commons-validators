@@ -21,12 +21,12 @@ class SortCodeValidatorTest {
 
     @Test
     void shouldReturnFalseForNullInput() {
-        assertThat(validator.isValid(null)).isFalse();
+        assertThat(validator.isValidSortCode(null)).isFalse();
     }
 
     @Test
     void shouldReturnFalseForEmptyInput() {
-        assertThat(validator.isValid("")).isFalse();
+        assertThat(validator.isValidSortCode("")).isFalse();
     }
 
     @ParameterizedTest
@@ -41,7 +41,7 @@ class SortCodeValidatorTest {
             "83-91-36"   // Example sort code
     })
     void shouldReturnTrueForValidSortCodes(String sortCode) {
-        assertThat(validator.isValid(sortCode)).isTrue();
+        assertThat(validator.isValidSortCode(sortCode)).isTrue();
     }
 
     @ParameterizedTest
@@ -55,7 +55,7 @@ class SortCodeValidatorTest {
             "12-34-5a"   // Contains letter
     })
     void shouldReturnFalseForInvalidSortCodes(String sortCode) {
-        assertThat(validator.isValid(sortCode)).isFalse();
+        assertThat(validator.isValidSortCode(sortCode)).isFalse();
     }
 
     @Test

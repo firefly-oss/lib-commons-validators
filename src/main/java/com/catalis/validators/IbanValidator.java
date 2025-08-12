@@ -1,5 +1,9 @@
 package com.catalis.validators;
 
+import com.catalis.annotations.ValidIban;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -14,7 +18,7 @@ import java.util.regex.Pattern;
  * - Length validation based on country
  * - Character set validation
  */
-public class IbanValidator {
+public class IbanValidator implements ConstraintValidator<ValidIban, String> {
     
     // Map of country codes to their respective IBAN lengths
     private static final Map<String, Integer> COUNTRY_CODE_TO_LENGTH = new HashMap<>();
@@ -110,7 +114,8 @@ public class IbanValidator {
      * @param iban the IBAN to validate
      * @return true if the IBAN is valid, false otherwise
      */
-    public boolean isValid(String iban) {
+    @Override
+    public boolean isValid(String iban, ConstraintValidatorContext context) {
         if (iban == null || iban.isEmpty()) {
             return false;
         }

@@ -29,7 +29,7 @@ Add the following dependency to your Maven `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.catalis</groupId>
+    <groupId>com.firefly</groupId>
     <artifactId>lib-common-validators</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
@@ -38,7 +38,7 @@ Add the following dependency to your Maven `pom.xml`:
 For Gradle projects, add:
 
 ```groovy
-implementation 'com.catalis:lib-common-validators:1.0.0-SNAPSHOT'
+implementation 'com.firefly:lib-common-validators:1.0.0-SNAPSHOT'
 ```
 
 ## Usage
